@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KoliPro (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "KoliPro (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
