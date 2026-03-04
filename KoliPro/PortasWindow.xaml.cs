@@ -3,23 +3,17 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace KoliPro
 {
     // Segédosztály a listához
-    public class GuestInfo
-    {
-        public string Name { get; set; }
-        public string CardId { get; set; }
-        public string Room { get; set; }
-        public string ArriveTime { get; set; }
-        public string LeaveTime { get; set; }
-    }
+
 
     public sealed partial class PortasWindow : Window
     {
         private DispatcherTimer _clockTimer;
-        // Ez a lista tárolja a vendégeket a memóriában (vázlat szinten)
         private ObservableCollection<GuestInfo> _guests = new();
         private ObservableCollection<GuestInfo> _filteredGuests = new();
 
@@ -30,6 +24,51 @@ namespace KoliPro
             GuestListView.ItemsSource = _filteredGuests;
         }
 
+        public static bool IsStillHere(string leaveTime) => leaveTime == "---";
+
+
+
+
+        private async void MenuCheckout_Click(object sender, RoutedEventArgs e)
+        {
+            var menuEntry = sender as MenuFlyoutItem;
+            var guest = menuEntry.DataContext as GuestInfo;
+
+            if (guest == null || guest.IsOut) return;
+
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Kijelentkeztetés",
+                Content = $"{guest.Name} kiléptetése?",
+                PrimaryButtonText = "OK",
+                CloseButtonText = "Mégse",
+                XamlRoot = this.Content.XamlRoot
+            };
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                guest.LeaveTime = DateTime.Now.ToString("yyyy.MM.dd. HH:mm:ss");
+            }
+        }
+        private void MenuReAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var menuEntry = sender as MenuFlyoutItem;
+            var oldGuest = menuEntry.DataContext as GuestInfo;
+
+            if (oldGuest == null) return;
+
+            var newGuest = new GuestInfo
+            {
+                Name = oldGuest.Name,
+                CardId = oldGuest.CardId,
+                Room = oldGuest.Room,
+                ArriveTime = DateTime.Now.ToString("yyyy.MM.dd. HH:mm:ss"),
+                LeaveTime = "---"
+            };
+
+            _guests.Add(newGuest);
+            UpdateFilteredList(GuestSearchBox.Text ?? "");
+        }
         private void SetupClock()
         {
             _clockTimer = new DispatcherTimer();
@@ -45,7 +84,7 @@ namespace KoliPro
             DashboardGrid.Visibility = Visibility.Collapsed;
             GuestGrid.Visibility = Visibility.Visible;
             BackButton.Visibility = Visibility.Visible;
-            TimeInput.Text = DateTime.Now.ToString("HH:mm:ss");
+            TimeInput.Text = DateTime.Now.ToString("yyyy.MM.dd. HH:mm:ss");
         }
 
         private void BackToDashboard_Click(object sender, RoutedEventArgs e)
@@ -55,7 +94,6 @@ namespace KoliPro
             BackButton.Visibility = Visibility.Collapsed;
         }
 
-        // VENDÉG HOZZÁADÁSA
         private void AddGuest_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(NameInput.Text)) return;
@@ -65,21 +103,19 @@ namespace KoliPro
                 Name = NameInput.Text,
                 CardId = CardInput.Text,
                 Room = RoomInput.Text,
-                ArriveTime = TimeInput.Text,
+                ArriveTime = DateTime.Now.ToString("yyyy.MM.dd. HH:mm:ss"),
                 LeaveTime = "---"
             };
 
             _guests.Add(newGuest);
-            UpdateFilteredList("");
+            UpdateFilteredList(GuestSearchBox.Text ?? "");
 
-            // Mezõk ürítése
             NameInput.Text = "";
             CardInput.Text = "";
             RoomInput.Text = "";
             TimeInput.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
-        // KERESÉS LOGIKA
         private void GuestSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             UpdateFilteredList(sender.Text);

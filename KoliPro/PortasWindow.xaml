@@ -11,7 +11,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Modern Fejléc -->
         <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundAccentBrush}" Padding="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -31,8 +30,7 @@
                     Background="Transparent" Foreground="White" BorderThickness="0"
                     VerticalAlignment="Center" HorizontalAlignment="Right"/>
         </Grid>
-
-        <!-- 1. IRÁNYÍTÓPULT (Kártyák) -->
+        
         <Grid x:Name="DashboardGrid" Grid.Row="1" Padding="40" Visibility="Visible">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -71,14 +69,12 @@
             </Button>
         </Grid>
 
-        <!-- 2. VENDÉGKEZELŐ LAP -->
         <Grid x:Name="GuestGrid" Grid.Row="1" Visibility="Collapsed">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Bal oldal: Lista és Keresés -->
             <Grid Grid.Column="0" Padding="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -92,16 +88,16 @@
                                 TextChanged="GuestSearchBox_TextChanged"/>
 
                 <ListView x:Name="GuestListView" Grid.Row="1" 
-                          Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
-                          CornerRadius="8" Padding="10">
+          Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+          CornerRadius="8" Padding="10">
                     <ListView.Header>
-                        <Grid Padding="12,0">
+                        <Grid Padding="12,10">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="180"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Név" FontWeight="Bold" Grid.Column="0"/>
                             <TextBlock Text="Kártyaszám" FontWeight="Bold" Grid.Column="1"/>
@@ -113,25 +109,38 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="local:GuestInfo">
                             <Grid Padding="5">
+                                <Grid.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="Kijelentkeztetés" 
+                                    Click="MenuCheckout_Click" 
+                                    Icon="LeaveChat"
+                                    IsEnabled="{x:Bind CanCheckout, Mode=OneWay}"/>
+                                        <MenuFlyoutItem Text="Újbóli felvétel (Másolás)" 
+                                    Click="MenuReAdd_Click" 
+                                    Icon="Refresh"
+                                    IsEnabled="{x:Bind IsOut, Mode=OneWay}"/>
+                                    </MenuFlyout>
+                                </Grid.ContextFlyout>
+
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="180"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{x:Bind Name}" Grid.Column="0"/>
-                                <TextBlock Text="{x:Bind CardId}" Grid.Column="1"/>
-                                <TextBlock Text="{x:Bind Room}" Grid.Column="2"/>
-                                <TextBlock Text="{x:Bind ArriveTime}" Grid.Column="3"/>
-                                <TextBlock Text="{x:Bind LeaveTime}" Grid.Column="4"/>
+
+                                <TextBlock Text="{x:Bind Name}" Grid.Column="0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind CardId}" Grid.Column="1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind Room}" Grid.Column="2" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind ArriveTime}" Grid.Column="3" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Bind LeaveTime, Mode=OneWay}" Grid.Column="4" VerticalAlignment="Center"/>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
             </Grid>
 
-            <!-- Jobb oldal: Űrlap -->
             <StackPanel Grid.Column="1" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Padding="20" Spacing="15">
                 <TextBlock Text="Új vendég hozzáadása" FontSize="18" FontWeight="Bold" Margin="0,0,0,5"/>
                 <TextBox x:Name="NameInput" Header="Név" PlaceholderText="Példa Béla"/>
