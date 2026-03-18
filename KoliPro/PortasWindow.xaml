@@ -22,8 +22,10 @@
                         Margin="0,0,15,0" Background="Transparent" BorderThickness="0">
                     <FontIcon Glyph="&#xE72B;" Foreground="White"/>
                 </Button>
-                <TextBlock Text="Bejelentkezve: Portás | " Foreground="White" Opacity="0.8" FontSize="16"/>
-                <TextBlock x:Name="ClockTextBlock" Foreground="White" Opacity="1" FontSize="16" FontWeight="SemiBold"/>
+
+                <TextBlock x:Name="LoginInfoTextBlock" Foreground="White" Opacity="0.8" FontSize="16" />
+
+                <TextBlock x:Name="ClockTextBlock" Foreground="White" Opacity="1" FontSize="16" FontWeight="SemiBold" />
             </StackPanel>
 
             <Button Grid.Column="1" Content="Kijelentkezés" Click="Logout_Click" 
@@ -112,13 +114,14 @@
                                 <Grid.ContextFlyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem Text="Kijelentkeztetés" 
-                                    Click="MenuCheckout_Click" 
-                                    Icon="LeaveChat"
-                                    IsEnabled="{x:Bind CanCheckout, Mode=OneWay}"/>
-                                        <MenuFlyoutItem Text="Újbóli felvétel (Másolás)" 
-                                    Click="MenuReAdd_Click" 
-                                    Icon="Refresh"
-                                    IsEnabled="{x:Bind IsOut, Mode=OneWay}"/>
+                                            Click="MenuCheckout_Click" 
+                                            Icon="LeaveChat"
+                                            IsEnabled="{x:Bind local:PortasWindow.IsStillHere(LeaveTime), Mode=OneWay}"/>
+
+                                            <MenuFlyoutItem Text="Újbóli felvétel (Másolás)" 
+                                            Click="MenuReAdd_Click" 
+                                            Icon="Refresh"
+                                            IsEnabled="{x:Bind local:PortasWindow.IsAlreadyOut(LeaveTime), Mode=OneWay}"/>
                                     </MenuFlyout>
                                 </Grid.ContextFlyout>
 

@@ -1,17 +1,30 @@
-﻿using System.ComponentModel;
+﻿using Postgrest.Attributes;
+using Postgrest.Models;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace KoliPro
 {
-    public class GuestInfo : INotifyPropertyChanged
+    [Table("guests")]
+    public class GuestInfo : BaseModel, INotifyPropertyChanged
     {
-        private string _leaveTime;
+        [PrimaryKey("id", false)]
+        public long Id { get; set; }
 
+        [Column("name")]
         public string Name { get; set; }
+
+        [Column("card_id")]
         public string CardId { get; set; }
+
+        [Column("room")]
         public string Room { get; set; }
+
+        [Column("arrive_time")]
         public string ArriveTime { get; set; }
 
+        private string _leaveTime;
+        [Column("leave_time")]
         public string LeaveTime
         {
             get => _leaveTime;
@@ -21,14 +34,9 @@ namespace KoliPro
                 {
                     _leaveTime = value;
                     OnPropertyChanged();
-                    OnPropertyChanged(nameof(IsOut));
-                    OnPropertyChanged(nameof(CanCheckout));
                 }
             }
         }
-
-        public bool IsOut => LeaveTime != "---";
-        public bool CanCheckout => LeaveTime == "---";
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

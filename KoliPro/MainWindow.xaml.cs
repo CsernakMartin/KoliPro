@@ -1,9 +1,10 @@
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI;
 using System;
+using System.Linq;
 using WinRT.Interop;
-using Microsoft.UI.Windowing;
 
 namespace KoliPro
 {
@@ -15,25 +16,57 @@ namespace KoliPro
 
         }
 
-        
-        private void LoginButton_Click(object sender, RoutedEventArgs e)
+
+        private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             string user = UsernameBox.Text;
             string pass = PasswordBox.Password;
 
-            if (pass == "1")
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass)) return;
+
+            try
             {
-                if (user == "1")
+                var result = await App.SupabaseClient
+                    .From<Employee>()
+                    .Where(x => x.Username == user)
+                    .Where(x => x.Password == pass)
+                    .Get();
+
+                var loggedInUser = result.Models.FirstOrDefault();
+
+                if (loggedInUser != null)
                 {
-                    var PortasWin = new PortasWindow();
-                    PortasWin.Activate();
-                    this.Close();
+                    App.CurrentUser = loggedInUser;
+
+                    switch (loggedInUser.Role)
+                    {
+                        case "Portás":
+                            var portasWin = new PortasWindow();
+                            portasWin.Activate();
+                            this.Close();
+                            break;
+
+                        case "Admin":
+                             var adminWin = new AdminWindow();
+                             adminWin.Activate();
+                             this.Close();
+                            break;
+
+                        default:
+                            ErrorText.Text = "Nincs jogosultsága a belépéshez!";
+                            ErrorText.Visibility = Visibility.Visible;
+                            break;
+                    }
+                }
+                else
+                {
+                    ErrorText.Text = "Hibás felhasználónév vagy jelszó!";
+                    ErrorText.Visibility = Visibility.Visible;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                ErrorText.Text = "Hibás felhasználónév vagy jelszó!";
-                ErrorText.Visibility = Visibility.Visible;
+                System.Diagnostics.Debug.WriteLine($"Login hiba: {ex.Message}");
             }
         }
     }

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="KoliPro.AdminWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:KoliPro"
+    Title="KoliPro - Adminisztrátori Felület">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="#2c3e50" Padding="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="BackButton" Click="BackToAdminDashboard_Click" Visibility="Collapsed" 
+                        Margin="0,0,15,0" Background="Transparent" BorderThickness="0">
+                    <FontIcon Glyph="&#xE72B;" Foreground="White"/>
+                </Button>
+                <TextBlock x:Name="AdminInfoTextBlock" Foreground="White" Opacity="0.8" FontSize="16" />
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Kijelentkezés" Click="Logout_Click" 
+                    Background="Transparent" Foreground="White" BorderThickness="0"/>
+        </Grid>
+
+        <Grid x:Name="AdminDashboardGrid" Grid.Row="1" Padding="40" Visibility="Visible">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Click="OpenResidentManagement_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" CornerRadius="12" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="15">
+                    <FontIcon Glyph="&#xE77B;" FontSize="50" Foreground="DeepSkyBlue"/>
+                    <TextBlock Text="Lakók kezelése" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Új lakók beköltöztetése és képek feltöltése" FontSize="12" Foreground="Gray" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="1" Click="OpenRoomConfig_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" CornerRadius="12" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="15">
+                    <FontIcon Glyph="&#xE80F;" FontSize="50" Foreground="MediumSeaGreen"/>
+                    <TextBlock Text="Szoba konfiguráció" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Szobák beosztása, férőhelyek kezelése" FontSize="12" Foreground="Gray" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Button>
+
+            <Button Grid.Column="2" Click="OpenErrorReports_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" CornerRadius="12" Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+                <StackPanel Spacing="15">
+                    <FontIcon Glyph="&#xEBE8;" FontSize="50" Foreground="Crimson"/>
+                    <TextBlock Text="Bejelentett hibák" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Műszaki hibák és javítási igények" FontSize="12" Foreground="Gray" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <Grid x:Name="ResidentGrid" Grid.Row="1" Visibility="Collapsed" Padding="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Padding="20" Spacing="15" CornerRadius="8">
+                <TextBlock Text="Új lakó felvétele" FontSize="18" FontWeight="Bold"/>
+
+                <StackPanel Spacing="10" HorizontalAlignment="Center">
+                    <Border BorderBrush="Gray" BorderThickness="2" Width="160" Height="160" CornerRadius="80">
+                        <Image x:Name="ResidentPhotoPreview" Stretch="UniformToFill">
+                            <Image.Source>
+                                <BitmapImage UriSource="ms-appx:///Assets/placeholder_user.png"/>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <Button Content="Kép kiválasztása" Click="UploadPhoto_Click" HorizontalAlignment="Center" Style="{StaticResource DefaultButtonStyle}"/>
+                </StackPanel>
+
+                <TextBox x:Name="ResidentNameInput" Header="Teljes név" PlaceholderText="Példa János"/>
+                <TextBox x:Name="ResidentRoomInput" Header="Szobaszám" PlaceholderText="A/101"/>
+                <TextBox x:Name="ResidentEmailInput" Header="E-mail cím" PlaceholderText="janos@koli.hu"/>
+
+                <Button Content="Lakó mentése" Click="SaveResident_Click" 
+                        Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Column="1" Margin="20,0,0,0">
+                <TextBlock Text="Beköltözött lakók listája" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

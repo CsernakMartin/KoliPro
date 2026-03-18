@@ -22,19 +22,48 @@ namespace KoliPro
             this.InitializeComponent();
             SetupClock();
             GuestListView.ItemsSource = _filteredGuests;
+
+            LoadDataFromCloud();
+            if (App.CurrentUser != null)
+            {
+                LoginInfoTextBlock.Text = $"Bejelentkezve: {App.CurrentUser.FullName} ({App.CurrentUser.Role}) | ";
+            }
         }
-
+        private void Window_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            if (App.CurrentUser != null)
+            {
+                LoginInfoTextBlock.Text = $"Bejelentkezve: {App.CurrentUser.FullName} ({App.CurrentUser.Role}) | ";
+            }
+        }
         public static bool IsStillHere(string leaveTime) => leaveTime == "---";
+        public static bool IsAlreadyOut(string leaveTime) => leaveTime != "---";
 
 
-
-
+        private async void LoadDataFromCloud()
+        {
+            try
+            {
+                var result = await App.SupabaseClient.From<GuestInfo>()
+                    .Get();
+                _guests.Clear();
+                foreach (var guest in result.Models)
+                {
+                    _guests.Add(guest);
+                }
+                UpdateFilteredList("");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Supabase hiba: {ex.Message}");
+            }
+        }
         private async void MenuCheckout_Click(object sender, RoutedEventArgs e)
         {
             var menuEntry = sender as MenuFlyoutItem;
             var guest = menuEntry.DataContext as GuestInfo;
 
-            if (guest == null || guest.IsOut) return;
+            if (guest == null || guest.LeaveTime != "---") return;
 
             ContentDialog dialog = new ContentDialog
             {
@@ -48,9 +77,12 @@ namespace KoliPro
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 guest.LeaveTime = DateTime.Now.ToString("yyyy.MM.dd. HH:mm:ss");
+                await App.SupabaseClient.From<GuestInfo>().Update(guest);
             }
         }
-        private void MenuReAdd_Click(object sender, RoutedEventArgs e)
+
+
+        private async void MenuReAdd_Click(object sender, RoutedEventArgs e)
         {
             var menuEntry = sender as MenuFlyoutItem;
             var oldGuest = menuEntry.DataContext as GuestInfo;
@@ -66,7 +98,10 @@ namespace KoliPro
                 LeaveTime = "---"
             };
 
-            _guests.Add(newGuest);
+            var response = await App.SupabaseClient.From<GuestInfo>().Insert(newGuest);
+            var saved = response.Models.FirstOrDefault();
+
+            _guests.Add(saved ?? newGuest);
             UpdateFilteredList(GuestSearchBox.Text ?? "");
         }
         private void SetupClock()
@@ -94,7 +129,7 @@ namespace KoliPro
             BackButton.Visibility = Visibility.Collapsed;
         }
 
-        private void AddGuest_Click(object sender, RoutedEventArgs e)
+        private async void AddGuest_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(NameInput.Text)) return;
 
@@ -107,13 +142,29 @@ namespace KoliPro
                 LeaveTime = "---"
             };
 
-            _guests.Add(newGuest);
-            UpdateFilteredList(GuestSearchBox.Text ?? "");
+            try
+            {
+                var response = await App.SupabaseClient
+                    .From<GuestInfo>()
+                    .Insert(newGuest, new Postgrest.QueryOptions { Returning = Postgrest.QueryOptions.ReturnType.Representation });
 
-            NameInput.Text = "";
-            CardInput.Text = "";
-            RoomInput.Text = "";
-            TimeInput.Text = DateTime.Now.ToString("HH:mm:ss");
+                var savedGuest = response.Models.FirstOrDefault();
+                var guestToDisplay = savedGuest ?? newGuest;
+
+                _guests.Add(guestToDisplay);
+                UpdateFilteredList(GuestSearchBox.Text ?? "");
+
+                NameInput.Text = "";
+                CardInput.Text = "";
+                RoomInput.Text = "";
+                TimeInput.Text = DateTime.Now.ToString("HH:mm:ss");
+
+                System.Diagnostics.Debug.WriteLine("Sikeres mentés a felhõbe!");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Supabase hiba: {ex.Message}");
+            }
         }
 
         private void GuestSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
